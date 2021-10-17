@@ -26,7 +26,8 @@ struct object
 {
     float x;
     float y;
-    object(float a = 0 ):x(0),y(0) {};
+    int number;
+    object(float a = 0 ):x(0),y(0),number(0) {};
 };
 
 float getPNPtime0(object ready_to_pick, float time_now, float convey_speed = CONVEY_SPEED);

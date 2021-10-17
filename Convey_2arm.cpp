@@ -35,6 +35,7 @@ Convey_2arm::Convey_2arm(int mode_)
             {
                 temp_poisson.x = 4.0 - i*1.0+ d(gen)/100.0;//x方向等距+随机泊松量
                 temp_poisson.y = d(gen)/10.0;
+                temp_poisson.number = i;
                 convey_object.push_back(temp_poisson);
             }
         }

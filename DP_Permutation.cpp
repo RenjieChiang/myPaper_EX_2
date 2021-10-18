@@ -12,7 +12,7 @@ int DP_Permutation::getPermutationTotal(std::vector<object> permutation_vector)
     for (auto vec : permutation_vector)
     {
         temp_DP_unit.number_objects = 1;
-        temp_DP_unit.best_permutation.push_back(vec);
+//        temp_DP_unit.best_permutation.push_back(vec);
         float T0 = 0,T1 = 0;
         int miss_0 = 0, miss_1 =0;
 
@@ -41,14 +41,18 @@ int DP_Permutation::getPermutationTotal(std::vector<object> permutation_vector)
         temp_DP_unit.best_miss = miss_0;
         temp_DP_unit.easy0time = 0;
         temp_DP_unit.easy1time = miss_0 == 0? 0-T0 : 0;
-        DP0Sequence_combine[getID(temp_DP_unit.best_permutation)] = temp_DP_unit;
+        temp_DP_unit.best_permutation_0.push_back(vec);
+        DP0Sequence_combine[getID(temp_DP_unit.best_permutation_0)] = temp_DP_unit;
 
+        temp_DP_unit.best_permutation_0.clear();
         //1序列
         temp_DP_unit.best_time = T1;
         temp_DP_unit.best_miss = miss_1;
         temp_DP_unit.easy0time = miss_1 == 0? 0-T1 : 0;
         temp_DP_unit.easy1time = 0;
-        DP0Sequence_combine[getID(temp_DP_unit.best_permutation)] = temp_DP_unit;
+        temp_DP_unit.best_permutation_1.push_back(vec);
+        DP0Sequence_combine[getID(temp_DP_unit.best_permutation_1)] = temp_DP_unit;
+        temp_DP_unit.best_permutation_1.clear();
     }
 
 
@@ -100,12 +104,22 @@ int DP_Permutation::update(const std::vector<object> &temp_, const std::vector<o
     //计算temp中，以i为结尾的最速时间
     float best_time_in_0 = 0;
     int best_miss_in_0 = 0;
+    //最后更新序列0物体顺序所需要的信息
+    int best_seq_0_i_exp = 0;//以i为抓取最速
+    int best_seq_0_exp_from_ = 0;//记录最优序列是从0/1发展而来的
+    int best_seq_0_exp_last_cat = 0;//记录最优序列是哪台机械臂抓取的目标物体
+    float best_seq_0_exp_easy1time = 0;//更新该序列1的空闲时间
+
     float best_time_in_1 = 0;
     int best_miss_in_1 = 0;
-    std::vector<object> best_seq_in_0_arm0;
-    std::vector<object> best_seq_in_0_arm1;
-    std::vector<object> best_seq_in_1_arm0;
-    std::vector<object> best_seq_in_1_arm1;
+    //最后更新序列1物体顺序所需要的信息
+    int best_seq_1_i_exp = 0;//以i为抓取最速
+    int best_seq_1_exp_from_ = 0;//记录最优序列是从0/1发展而来的
+    int best_seq_1_exp_last_cat = 0;//记录最优序列是哪台机械臂抓取的目标物体
+    float best_seq_1_exp_easy0time = 0;//更新该序列0的空闲时间
+
+    int i = 0;
+
     for (auto vec : temp_)
     {
         int id_temp_except_vec = id_temp - (int)pow(2,vec.number);
@@ -125,6 +139,84 @@ int DP_Permutation::update(const std::vector<object> &temp_, const std::vector<o
             miss_020++;
         }
         int flag020 = 0;//肯定还是属于0序列
+        if (best_time_in_0 == 0)//若是第一次更新本组合的best 0 time
+        {
+            best_time_in_0 = T020;
+            best_miss_in_0 = miss_020;
+            best_seq_0_i_exp = i;
+            best_seq_0_exp_from_ = 0;
+            best_seq_0_exp_last_cat = 0;
+            best_seq_0_exp_easy1time = DP0Sequence_combine[id_temp_except_vec].easy1time - pnp;
+        } else
+        {
+            if (miss_020 == best_miss_in_0)
+            {
+                if (T020 < best_time_in_0)
+                {
+                    best_time_in_0 = T020;
+                    best_seq_0_i_exp = i;
+                    best_seq_0_exp_from_ = 0;
+                    best_seq_0_exp_last_cat = 0;
+                    best_seq_0_exp_easy1time = DP0Sequence_combine[id_temp_except_vec].easy1time - pnp;
+                }
+            } else if (miss_020 < best_miss_in_0)
+            {
+                best_time_in_0 = T020;
+                best_miss_in_0 = miss_020;
+                best_seq_0_i_exp = i;
+                best_seq_0_exp_from_ = 0;
+                best_seq_0_exp_last_cat = 0;
+                best_seq_0_exp_easy1time = DP0Sequence_combine[id_temp_except_vec].easy1time - pnp;
+            }
+        }
+
+
+        //用上次的1序列更新
+        float T121 = DP1Sequence_combine[id_temp_except_vec].best_time;
+        int miss_121 = DP1Sequence_combine[id_temp_except_vec].best_miss;
+        //用1抓
+        pnp = 0;
+        pnp = getPNPtime1(vec,T121);
+        if (pnp > 0)
+        {
+            T121 = T121 + pnp;
+        } else
+        {
+            miss_121++;
+        }
+        int flag121 = 1;
+        if (best_time_in_1 == 0)//若是第一次更新本组合的best 1 time
+        {
+            best_time_in_1 = T121;
+            best_miss_in_1 = miss_121;
+            best_seq_1_i_exp = i;
+            best_seq_1_exp_from_ = 1;
+            best_seq_1_exp_last_cat = 1;
+            best_seq_1_exp_easy0time = DP1Sequence_combine[id_temp_except_vec].easy0time - pnp;
+        } else
+        {
+            if (miss_121 == best_miss_in_1)
+            {
+                if (T121 < best_time_in_1)
+                {
+                    best_time_in_1 = T121;
+                    best_seq_1_i_exp = i;
+                    best_seq_1_exp_from_ = 1;
+                    best_seq_1_exp_last_cat = 1;
+                    best_seq_1_exp_easy0time = DP1Sequence_combine[id_temp_except_vec].easy0time - pnp;
+                }
+            } else if (miss_121 < best_miss_in_1)
+            {
+                best_time_in_1 = T121;
+                best_miss_in_1 = miss_121;
+                best_seq_1_i_exp = i;
+                best_seq_1_exp_from_ = 1;
+                best_seq_1_exp_last_cat = 1;
+                best_seq_1_exp_easy0time = DP1Sequence_combine[id_temp_except_vec].easy0time - pnp;
+            }
+        }
+
+
 
         //用上次的1序列更新
         float T120 = DP1Sequence_combine[id_temp_except_vec].best_time;
@@ -143,29 +235,54 @@ int DP_Permutation::update(const std::vector<object> &temp_, const std::vector<o
         if (T120 > DP1Sequence_combine[id_temp_except_vec].best_time)
         {
             flag120 = 0;//属于0序列结果
+
+            if (miss_120 == best_miss_in_0)
+            {
+                if (T120 < best_time_in_0)
+                {
+                    best_time_in_0 = T120;
+                    best_seq_0_i_exp = i;
+                    best_seq_0_exp_from_ = 1;
+                    best_seq_0_exp_last_cat = 0;
+                    best_seq_0_exp_easy1time = -T120 + DP1Sequence_combine[id_temp_except_vec].best_time;
+                }
+            } else if (miss_120 < best_miss_in_0)
+            {
+                best_time_in_0 = T120;
+                best_miss_in_0 = miss_120;
+                best_seq_0_i_exp = i;
+                best_seq_0_exp_from_ = 1;
+                best_seq_0_exp_last_cat = 0;
+                best_seq_0_exp_easy1time = -T120 + DP1Sequence_combine[id_temp_except_vec].best_time;
+            }
         } else
         {
-            flag120 = 1;
+            flag120 = 1;//属于序列1，即总时间没变，只是用了easy0time或者是miss了
 //            T120 = DP1Sequence_combine[id_temp_except_vec].best_time;
-
+            if (miss_120 == best_miss_in_1)
+            {
+                if (DP1Sequence_combine[id_temp_except_vec].best_time < best_time_in_1)
+                {
+                    best_time_in_1 = DP1Sequence_combine[id_temp_except_vec].best_time;
+                    best_seq_1_i_exp = i;
+                    best_seq_1_exp_from_ = 1;
+                    best_seq_1_exp_last_cat = 0;
+                    best_seq_1_exp_easy0time = T120 - DP1Sequence_combine[id_temp_except_vec].best_time ;
+                }
+            } else if (miss_120 < best_miss_in_1)
+            {
+                best_time_in_1 = DP1Sequence_combine[id_temp_except_vec].best_time ;
+                best_miss_in_1 = miss_120;
+                best_seq_1_i_exp = i;
+                best_seq_1_exp_from_ = 1;
+                best_seq_1_exp_last_cat = 0;
+                best_seq_1_exp_easy0time = T120 - DP1Sequence_combine[id_temp_except_vec].best_time;
+            }
         }
 
         //计算1序列,即试图使用1抓这个物体
 
-        //用上次的1序列更新
-        float T121 = DP1Sequence_combine[id_temp_except_vec].best_time;
-        int miss_121 = DP1Sequence_combine[id_temp_except_vec].best_miss;
-        //用1抓
-        pnp = 0;
-        pnp = getPNPtime1(vec,T121);
-        if (pnp > 0)
-        {
-            T121 = T121 + pnp;
-        } else
-        {
-            miss_121++;
-        }
-        int flag121 = 1;
+
 
         //用上次的0序列更新
         float T021 = DP0Sequence_combine[id_temp_except_vec].best_time;
@@ -184,14 +301,52 @@ int DP_Permutation::update(const std::vector<object> &temp_, const std::vector<o
         if (T021 > DP0Sequence_combine[id_temp_except_vec].best_time)
         {
             flag021 = 1;//属于1序列结果
+            if (miss_021 == best_miss_in_1)
+            {
+                if (T021 < best_time_in_1)
+                {
+                    best_time_in_1 = T021;
+                    best_seq_1_i_exp = i;
+                    best_seq_1_exp_from_ = 0;
+                    best_seq_1_exp_last_cat = 1;
+                    best_seq_1_exp_easy0time = -T021 + DP0Sequence_combine[id_temp_except_vec].best_time;
+                }
+            } else if (miss_021 < best_miss_in_1)
+            {
+                best_miss_in_1 = miss_021;
+                best_time_in_1 = T021;
+                best_seq_1_i_exp = i;
+                best_seq_1_exp_from_ = 0;
+                best_seq_1_exp_last_cat = 1;
+                best_seq_1_exp_easy0time = -T021 + DP0Sequence_combine[id_temp_except_vec].best_time;
+            }
+
         } else
         {
             flag021 = 0;
 //            T021 = DP0Sequence_combine[id_temp_except_vec].best_time;
+            if (miss_021 == best_miss_in_0)
+            {
+                if (DP0Sequence_combine[id_temp_except_vec].best_time < best_time_in_1)
+                {
+                    best_time_in_0 = DP0Sequence_combine[id_temp_except_vec].best_time;
+                    best_seq_0_i_exp = i;
+                    best_seq_0_exp_from_ = 0;
+                    best_seq_0_exp_last_cat = 1;
+                    best_seq_0_exp_easy1time = T021 - DP0Sequence_combine[id_temp_except_vec].best_time ;
+                }
+            } else if (miss_021 < best_miss_in_0)
+            {
+                best_miss_in_0 = miss_021;
+                best_time_in_0 = DP0Sequence_combine[id_temp_except_vec].best_time;
+                best_seq_0_i_exp = i;
+                best_seq_0_exp_from_ = 0;
+                best_seq_0_exp_last_cat = 1;
+                best_seq_0_exp_easy1time = T021 - DP0Sequence_combine[id_temp_except_vec].best_time ;
+            }
         }
 
         DP_Sequence temp_DP_unit;
-
 
         //开始真正的比较
         //建立 0和1序列的最佳记录
@@ -225,6 +380,7 @@ int DP_Permutation::update(const std::vector<object> &temp_, const std::vector<o
 //                DP0Sequence_combine[id_temp] = temp_DP_unit;
 //            }
 //        }
+    i++;
     }
     return 0;
 }

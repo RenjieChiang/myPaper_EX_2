@@ -14,7 +14,8 @@
 struct DP_Sequence
 {
     int number_objects;//组合中元素的个数
-    std::vector<object> best_permutation;
+    std::vector<object> best_permutation_0;
+    std::vector<object> best_permutation_1;
     float best_time;
     int best_miss;
 

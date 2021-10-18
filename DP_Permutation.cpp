@@ -346,42 +346,63 @@ int DP_Permutation::update(const std::vector<object> &temp_, const std::vector<o
             }
         }
 
-        DP_Sequence temp_DP_unit;
 
-        //开始真正的比较
-        //建立 0和1序列的最佳记录
-
-        //三个0序列取最优的情况
-//        if (flag021 == 0 && flag120 == 0)
-//        {
-//            //将121数据更新至1序列
-//            temp_DP_unit.best_time = T121;
-//            temp_DP_unit.best_miss = miss_121;
-//            temp_DP_unit.easy1time = 0;
-//            temp_DP_unit.easy0time = DP1Sequence_combine[id_temp_except_vec].easy0time + DP1Sequence_combine[id_temp_except_vec].best_time - T121;
-//            DP1Sequence_combine[id_temp] = temp_DP_unit;
-//
-//            if (miss_020<miss_021 && miss_020<miss_120)
-//            {
-//                //将020的数据更新至0序列
-//                temp_DP_unit.best_time = T020;
-//                temp_DP_unit.best_miss = miss_020;
-//                temp_DP_unit.easy0time = 0;
-//                temp_DP_unit.easy1time = DP0Sequence_combine[id_temp_except_vec].easy1time + DP0Sequence_combine[id_temp_except_vec].best_time - T020;
-//                DP0Sequence_combine[id_temp] = temp_DP_unit;
-//            }
-//            else if (miss_021<miss_020 && miss_021<miss_120)
-//            {
-//                //将021的数据更新至0序列
-//                temp_DP_unit.best_time = DP0Sequence_combine[id_temp_except_vec].best_time;
-//                temp_DP_unit.best_miss = miss_021;
-//                temp_DP_unit.easy0time = 0;
-//                temp_DP_unit.easy1time =  -DP0Sequence_combine[id_temp_except_vec].best_time + T021;
-//                DP0Sequence_combine[id_temp] = temp_DP_unit;
-//            }
-//        }
     i++;
     }
+
+    //循环结束，开始更新该组合最速序列
+
+    //更新0序列
+    int id_from = id_temp - pow(2, temp_[best_seq_0_i_exp].number);
+    DP_Sequence temp_seq;
+    temp_seq.best_time = best_time_in_0;
+    temp_seq.best_miss = best_miss_in_0;
+    temp_seq.number_objects = temp_.size();
+    temp_seq.easy1time = best_seq_0_exp_easy1time;
+    if (best_seq_0_exp_from_ == 1)
+    {
+        temp_seq.best_permutation_0 = DP1Sequence_combine[id_from].best_permutation_0;
+        temp_seq.best_permutation_1 = DP1Sequence_combine[id_from].best_permutation_1;
+        temp_seq.best_permutation_0.push_back(temp_[best_seq_0_i_exp]);
+    } else
+    {
+        temp_seq.best_permutation_0 = DP0Sequence_combine[id_from].best_permutation_0;
+        temp_seq.best_permutation_1 = DP0Sequence_combine[id_from].best_permutation_1;
+        if (best_seq_0_exp_last_cat == 0)
+        {
+            temp_seq.best_permutation_0.push_back(temp_[best_seq_0_i_exp]);
+        } else
+        {
+            temp_seq.best_permutation_1.push_back(temp_[best_seq_0_i_exp]);
+        }
+    }
+
+    // 更新1序列
+    id_from = id_temp - pow(2, temp_[best_seq_1_i_exp].number);
+    DP_Sequence temp_seq1;
+    temp_seq1.best_time = best_time_in_1;
+    temp_seq1.best_miss = best_miss_in_1;
+    temp_seq1.number_objects = temp_.size();
+    temp_seq1.easy1time = best_seq_1_exp_easy0time;
+    if (best_seq_1_exp_from_ == 0)
+    {
+        temp_seq1.best_permutation_0 = DP0Sequence_combine[id_from].best_permutation_0;
+        temp_seq1.best_permutation_1 = DP0Sequence_combine[id_from].best_permutation_1;
+        temp_seq1.best_permutation_1.push_back(temp_[best_seq_1_i_exp]);
+    } else
+    {
+        temp_seq1.best_permutation_0 = DP1Sequence_combine[id_from].best_permutation_0;
+        temp_seq1.best_permutation_1 = DP1Sequence_combine[id_from].best_permutation_1;
+        if (best_seq_1_exp_last_cat == 0)
+        {
+            temp_seq1.best_permutation_0.push_back(temp_[best_seq_1_i_exp]);
+        } else
+        {
+            temp_seq1.best_permutation_1.push_back(temp_[best_seq_1_i_exp]);
+        }
+    }
+
+
     return 0;
 }
 

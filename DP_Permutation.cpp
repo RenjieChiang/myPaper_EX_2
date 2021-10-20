@@ -3,6 +3,7 @@
 //
 
 #include "DP_Permutation.h"
+#include "iostream"
 
 int DP_Permutation::getPermutationTotal(std::vector<object> permutation_vector)
 {
@@ -54,9 +55,11 @@ int DP_Permutation::getPermutationTotal(std::vector<object> permutation_vector)
         DP1Sequence_combine[getID(temp_DP_unit.best_permutation_1)] = temp_DP_unit;
         temp_DP_unit.best_permutation_1.clear();
     }
+
     for(int i = 2;i < permutation_vector.size()+1; i++)
     {
         combine(permutation_vector,i);
+        std::cout << i;
     }
 
 
@@ -379,6 +382,7 @@ int DP_Permutation::update(const std::vector<object> &temp_, const std::vector<o
             temp_seq.best_permutation_1.push_back(temp_[best_seq_0_i_exp]);
         }
     }
+    DP0Sequence_combine[id_temp] = temp_seq;
 
     // 更新1序列
     id_from = id_temp - pow(2, temp_[best_seq_1_i_exp].number);
@@ -404,6 +408,7 @@ int DP_Permutation::update(const std::vector<object> &temp_, const std::vector<o
             temp_seq1.best_permutation_1.push_back(temp_[best_seq_1_i_exp]);
         }
     }
+    DP1Sequence_combine[id_temp] = temp_seq1;
 
 
     return 0;

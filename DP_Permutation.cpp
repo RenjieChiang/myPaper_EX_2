@@ -51,10 +51,13 @@ int DP_Permutation::getPermutationTotal(std::vector<object> permutation_vector)
         temp_DP_unit.easy0time = miss_1 == 0? 0-T1 : 0;
         temp_DP_unit.easy1time = 0;
         temp_DP_unit.best_permutation_1.push_back(vec);
-        DP0Sequence_combine[getID(temp_DP_unit.best_permutation_1)] = temp_DP_unit;
+        DP1Sequence_combine[getID(temp_DP_unit.best_permutation_1)] = temp_DP_unit;
         temp_DP_unit.best_permutation_1.clear();
     }
-
+    for(int i = 2;i < permutation_vector.size()+1; i++)
+    {
+        combine(permutation_vector,i);
+    }
 
 
     return 0;

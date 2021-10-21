@@ -59,7 +59,34 @@ int DP_Permutation::getPermutationTotal(std::vector<object> permutation_vector)
     for(int i = 2;i < permutation_vector.size()+1; i++)
     {
         combine(permutation_vector,i);
-        std::cout << i;
+    }
+    int MAX = getID(permutation_vector);
+    if (DP1Sequence_combine[MAX].best_miss > DP0Sequence_combine[MAX].best_miss)
+    {
+        best_missing = DP0Sequence_combine[MAX].best_miss;
+        best_time = DP0Sequence_combine[MAX].best_time;
+        best_0_per = DP0Sequence_combine[MAX].best_permutation_0;
+        best_1_per = DP0Sequence_combine[MAX].best_permutation_1;
+    } else if (DP1Sequence_combine[MAX].best_miss < DP0Sequence_combine[MAX].best_miss)
+    {
+        best_missing = DP1Sequence_combine[MAX].best_miss;
+        best_time = DP1Sequence_combine[MAX].best_time;
+        best_0_per = DP1Sequence_combine[MAX].best_permutation_0;
+        best_1_per = DP1Sequence_combine[MAX].best_permutation_1;
+    } else
+    {
+        best_missing = DP0Sequence_combine[MAX].best_miss;
+        if (DP1Sequence_combine[MAX].best_time > DP0Sequence_combine[MAX].best_time)
+        {
+            best_time = DP0Sequence_combine[MAX].best_time;
+            best_0_per = DP0Sequence_combine[MAX].best_permutation_0;
+            best_1_per = DP0Sequence_combine[MAX].best_permutation_1;
+        } else
+        {
+            best_time = DP1Sequence_combine[MAX].best_time;
+            best_0_per = DP1Sequence_combine[MAX].best_permutation_0;
+            best_1_per = DP1Sequence_combine[MAX].best_permutation_1;
+        }
     }
 
 
@@ -390,7 +417,7 @@ int DP_Permutation::update(const std::vector<object> &temp_, const std::vector<o
     temp_seq1.best_time = best_time_in_1;
     temp_seq1.best_miss = best_miss_in_1;
     temp_seq1.number_objects = temp_.size();
-    temp_seq1.easy1time = best_seq_1_exp_easy0time;
+    temp_seq1.easy0time = best_seq_1_exp_easy0time;
     if (best_seq_1_exp_from_ == 0)
     {
         temp_seq1.best_permutation_0 = DP0Sequence_combine[id_from].best_permutation_0;

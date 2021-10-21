@@ -12,7 +12,7 @@ int main() {
     float T = 0;//time now
     int number_picked = 0;//number of object which have picked
     clock_t start,end;//time of program running exhaust
-    Convey_2arm myConvey(2);
+    Convey_2arm myConvey(1);
 
     //permutation
     start = clock();

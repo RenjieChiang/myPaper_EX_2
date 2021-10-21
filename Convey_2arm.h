@@ -10,7 +10,7 @@
 #include "cmath"
 #include "vector"
 
-#define CONVEY_SPEED 1
+#define CONVEY_SPEED 0.5
 #define ARM_SPEED  1
 
 #define MAX_EDGE_0  0

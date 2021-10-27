@@ -6,6 +6,8 @@
 #include "Permutation_two_arms.h"
 #include "DP_Permutation.h"
 
+#include "classic_strategy.h"
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
     // initialize
@@ -14,7 +16,7 @@ int main() {
     clock_t start,end;//time of program running exhaust
     Convey_2arm myConvey(2);
 
-//    //permutation
+    //permutation
 //    start = clock();
 //    Permutation_two_arms myBest;
 //    myBest.getPermutationTotal(myConvey.convey_object);
@@ -64,6 +66,13 @@ int main() {
     }
     end = clock();
     std::cout<< std::endl << "time needed Permutation : " << end-start << "ms" << std::endl;
+
+    classic_strategy mySPT(myConvey.convey_object, 0);
+    mySPT.pick();
+    classic_strategy myFIFO(myConvey.convey_object, 1);
+    myFIFO.pick();
+    std::cout << " ";
+
 
     return 0;
 }

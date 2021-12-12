@@ -32,9 +32,9 @@ Convey_2arm::Convey_2arm(int mode_)
             std::mt19937 gen(rd());
             std::poisson_distribution<> d(10);
             object temp_poisson{};
-            for (int i = 0; i < 16; ++i)
+            for (int i = 0; i < 18; ++i)
             {
-                temp_poisson.x = 4 - i*8/16.+ d(gen)/100.0;//x方向等距+随机泊松量
+                temp_poisson.x = 4 - i*8/18.+ 2*d(gen)/100.0;//x方向等距+随机泊松量
                 temp_poisson.y = d(gen)/10.0;
                 temp_poisson.number = i;
                 convey_object.push_back(temp_poisson);
